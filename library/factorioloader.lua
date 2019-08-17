@@ -166,7 +166,11 @@ local function getDeps(module_info, name)
     --table.insert(deps, mod)
     for _, raw_dep in ipairs(mod.dependencies) do
         local dep = dep_base(raw_dep)
-        local required = string.sub(raw_dep, 1, 1) ~= "?"
+        local incompatible = string.sub(raw_dep, 1, 1) == "!"
+        if incompatible and module_info[dep] then
+            return {}
+        end
+        local required = not incompatible and string.sub(dep, 1, 1) ~= "?" and string.sub(raw_dep, 1, 3) ~= "(?)"
         if not module_info[dep] and required then
             return {}
         end
